@@ -1,0 +1,10 @@
+# Dockerfile for development
+# Based on the production Dockerfile, but with development additions.
+# Keep this file as close as possible to the production Dockerfile, so the environments match.
+
+FROM docker.io/fedora:latest
+LABEL maintainer="Daniel Riek <daniel@llnvd.io>
+
+RUN dnf -y upgrade && dnf -y clean all
+
+
