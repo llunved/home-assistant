@@ -1,0 +1,59 @@
+# Dockerfile for development
+# Based on the production Dockerfile, but with development additions.
+# Keep this file as close as possible to the production Dockerfile, so the environments match.
+
+FROM docker.io/fedora:latest
+LABEL maintainer="Daniel Riek <daniel@llnvd.io>
+
+RUN dnf -y upgrade && dnf -y clean all
+
+# Uncomment any of the following lines to disable the installation.
+#ENV INSTALL_OPENALPR no
+#ENV INSTALL_FFMPEG no
+#ENV INSTALL_LIBCEC no
+#ENV INSTALL_PHANTOMJS no
+#ENV INSTALL_COAP no
+#ENV INSTALL_SSOCR no
+#ENV INSTALL_IPERF3 no
+
+VOLUME /etc/homeassistant
+VOLUME /var/lib/data
+
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+# Copy build scripts
+COPY virtualization/Docker/ virtualization/Docker/
+RUN virtualization/Docker/setup_docker_prereqs.Fedora
+
+# Install hass component dependencies
+COPY requirements_all.txt requirements_all.txt
+
+# Uninstall enum34 because some dependencies install it but breaks Python 3.4+.
+# See PR #8103 for more info.
+RUN pip3 install --no-cache-dir -r requirements_all.txt && \
+    pip3 install --no-cache-dir mysqlclient psycopg2 uvloop cchardet cython
+
+# BEGIN: Development additions
+
+# Install nodejs
+RUN curl -sL https://deb.nodesource.com/setup_7.x | bash - && \
+    dnf install -y --setopt='tsflags=nodocs' nodejs
+
+# Install tox
+RUN pip3 install --no-cache-dir tox
+
+# Copy over everything required to run tox
+COPY requirements_test_all.txt setup.cfg setup.py tox.ini ./
+COPY homeassistant/const.py homeassistant/const.py
+
+# Prefetch dependencies for tox
+COPY homeassistant/package_constraints.txt homeassistant/package_constraints.txt
+RUN tox -e py36 --notest
+
+# END: Development additions
+
+# Copy source
+COPY . .
+
+CMD [ "python3", "-m", "homeassistant", "--config", "/config" ]

@@ -1,0 +1,73 @@
+#!/bin/bash
+# Install requirements and build dependencies for Home Assistant in Docker.
+
+# Stop on errors
+set -ex
+
+INSTALL_OPENALPR="${INSTALL_OPENALPR:-yes}"
+INSTALL_LIBCEC="${INSTALL_LIBCEC:-yes}"
+INSTALL_PHANTOMJS="${INSTALL_PHANTOMJS:-yes}"
+INSTALL_SSOCR="${INSTALL_SSOCR:-yes}"
+
+# Required debian packages for running hass or components
+PACKAGES=(
+  # build-essential is required for python pillow module on non-x86_64 arch
+  make automake gcc gcc-c++ kernel-devel
+  # homeassistant.components.image_processing.openalpr_local
+  libXrandr-devel
+  # homeassistant.components.device_tracker.nmap_tracker
+  nmap net-tools libcurl-devel
+  # homeassistant.components.device_tracker.bluetooth_tracker
+  bluez glib2-devel python3-bluez python3-pycurl
+  # homeassistant.components.device_tracker.owntracks
+  libsodium python3-libnacl
+  # homeassistant.components.zwave
+  python3-pyudev libgudev-devel
+  # homeassistant.components.homekit_controller
+  libmpc-devel mpfr-devel gmp-devel python3-gmpy2
+  # homeassistant.components.ffmpeg
+  ffmpeg
+  # homeassistant.components.sensor.iperf3
+  iperf3
+)
+
+# Required debian packages for building dependencies
+PACKAGES_DEV=(
+  cmake
+  git
+  swig
+)
+
+# Install packages
+dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+dnf -y upgrade 
+dnf install -y --setopt='tsflags=nodocs' ${PACKAGES[@]} ${PACKAGES_DEV[@]}
+
+# This is a list of scripts that install additional dependencies. If you only
+# need to install a package from the official debian repository, just add it
+# to the list above. Only create a script if you need compiling, manually
+# downloading or a 3rd party repository.
+if [ "$INSTALL_OPENALPR" == "yes" ]; then
+  virtualization/Docker/scripts/openalpr.Fedora
+fi
+
+if [ "$INSTALL_LIBCEC" == "yes" ]; then
+  dnf install -y libcec python3-libcec
+fi
+
+if [ "$INSTALL_PHANTOMJS" == "yes" ]; then
+  virtualization/Docker/scripts/phantomjs
+fi
+
+if [ "$INSTALL_SSOCR" == "yes" ]; then
+  virtualization/Docker/scripts/ssocr.Fedora
+fi
+
+# Remove packages
+dnf remove -y ${PACKAGES_DEV[@]}
+dnf -y autoremove
+
+# Cleanup
+dnf -y clean all
+rm -rf /var/lib/dnf/transaction* /tmp/* /var/tmp/* /usr/src/app/build/
+
