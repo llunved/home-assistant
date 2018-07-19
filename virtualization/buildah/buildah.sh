@@ -22,24 +22,29 @@ PACKAGES=(
   # homeassistant.components.device_tracker.nmap_tracker
     nmap net-tools libcurl-devel
   # homeassistant.components.device_tracker.bluetooth_tracker
-    bluez glib2-devel python3-bluez python3-pycurl
+    bluez glib2-devel python3-bluez
   # homeassistant.components.device_tracker.owntracks
     libsodium python3-libnacl
   # homeassistant.components.zwave
     python3-pyudev libgudev-devel
   # homeassistant.components.homekit_controller
-    libmpc-devel mpfr-devel gmp-devel python3-gmpy2
+    libmpc-devel mpfr-devel gmp-devel
   # homeassistant.components.ffmpeg
-    ffmpeg
+    ffmpeg 
   # homeassistant.components.sensor.iperf3
     iperf3
+  # pillow dependencies
+    libjpeg-turbo zlib libtiff freetype lcms2 libwebp openjpeg2 libimagequant libraqm
+  # Not sure why we need this
+  #  python3-lxml python3-pillow python3-gmpy2 python3-pycurl
   )
 
 # Required Fedora packages for building dependencies
 PACKAGES_DEV=(
-  cmake
-  git
-  swig
+  cmake git swig python3-devel
+  libffi-devel openssl-devel libxml2-devel
+  libjpeg-turbo-devel libtiff-devel zlib-devel openjpeg2-devel freetype-devel lcms2-devel libwebp-devel 
+  libimagequant-devel libraqm-devel
   )
 
 if [ "`buildah images | grep ${newcontainer_name}`" == "" ]; then
@@ -49,7 +54,7 @@ if [ "`buildah images | grep ${newcontainer_name}`" == "" ]; then
 
 	scratchmnt=$(buildah mount $newcontainer)
 
-	dnf install --installroot $scratchmnt --release ${FED_RELEASE} bash coreutils --setopt='tsflags=nodocs' --setopt install_weak_deps=false -y
+	dnf install --installroot $scratchmnt --release ${FED_RELEASE} bash coreutils microdnf --setopt='tsflags=nodocs' --setopt install_weak_deps=false -y
 	# Install packages
 	dnf install --installroot $scratchmnt --release ${FED_RELEASE} -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-${FED_RELEASE}.noarch.rpm
 
@@ -118,7 +123,7 @@ fi
 #install hass component dependencies
 
 hasscontainer=$(buildah from --network=host --name=${hasscontainer_name} localhost/${buildcontainer_name})
-#hassmnt=$(buildah mount ${hasscontainer})
+hassmnt=$(buildah mount ${hasscontainer})
 
 buildah add ${hasscontainer} requirements_all.txt requirements_all.txt
 
@@ -131,8 +136,8 @@ buildah run ${hasscontainer}  pip3 install --no-cache-dir -r requirements_all.tx
 # BEGIN: Development additions
 
 # Install nodejs
-buildah run ${hasscontainer} curl -sL https://deb.nodesource.com/setup_7.x | bash - && \
-	    dnf install -y --setopt='tsflags=nodocs' nodejs
+#buildah run ${hasscontainer} dnf install -y --setopt='tsflags=nodocs' nodejs
+dnf install --installroot $hassmnt --release ${FED_RELEASE}  -y --setopt install_weak_deps=false --setopt='tsflags=nodocs' nodejs
 
 # Install tox
 buildah run ${hasscontainer} pip3 install --no-cache-dir tox
