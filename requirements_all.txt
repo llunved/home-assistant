@@ -1147,7 +1147,8 @@ pyunifi==2.13
 pyupnp-async==0.1.0.2
 
 # homeassistant.components.binary_sensor.uptimerobot
-pyuptimerobot==0.0.5
+pyuptimerobot
+#==0.0.5
 
 # homeassistant.components.keyboard
 # pyuserinput==0.1.11
@@ -1198,13 +1199,14 @@ regenmaschine==1.0.2
 restrictedpython==4.0b4
 
 # homeassistant.components.rflink
-rflink==0.0.37
+#rflink
+#==0.0.37
 
 # homeassistant.components.ring
 ring_doorbell==0.2.1
 
 # homeassistant.components.notify.rocketchat
-rocketchat-API==0.6.1
+#rocketchat-API==0.6.1
 
 # homeassistant.components.vacuum.roomba
 roombapy==1.3.1
@@ -1259,7 +1261,7 @@ simplisafe-python==2.0.2
 sisyphus-control==2.1
 
 # homeassistant.components.skybell
-skybellpy==0.1.2
+#skybellpy==0.1.2
 
 # homeassistant.components.notify.slack
 slacker==0.9.65
@@ -1341,7 +1343,7 @@ tellduslive==0.10.4
 temperusb==1.5.3
 
 # homeassistant.components.tesla
-teslajsonpy==0.0.23
+#teslajsonpy==0.0.23
 
 # homeassistant.components.thingspeak
 thingspeak==0.4.1
@@ -1381,7 +1383,7 @@ upcloud-api==0.4.2
 upsmychoice==1.0.6
 
 # homeassistant.components.sensor.uscis
-uscisstatus==0.1.1
+#uscisstatus==0.1.1
 
 # homeassistant.components.camera.uvc
 uvcclient==0.10.1
@@ -1414,7 +1416,7 @@ wakeonlan==1.0.0
 waqiasync==1.0.0
 
 # homeassistant.components.cloud
-warrant==0.6.1
+#warrant==0.6.1
 
 # homeassistant.components.folder_watcher
 watchdog==0.8.3
@@ -1430,7 +1432,7 @@ websocket-client==0.37.0
 websockets==3.2
 
 # homeassistant.components.wirelesstag
-wirelesstagpy==0.3.0
+#wirelesstagpy==0.3.0
 
 # homeassistant.components.zigbee
 xbee-helper==0.0.7
