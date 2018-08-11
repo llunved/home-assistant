@@ -17,7 +17,7 @@ INSTALL_SSOCR="${INSTALL_SSOCR:-yes}"
 # Required Fedora packages for running hass or components
 PACKAGES=(
   # build-essential is required for python pillow module on non-x86_64 arch
-    tar bzip2 xz rsync make automake gcc gcc-c++ kernel-devel redhat-rpm-config
+    tar bzip2 xz rsync make automake gcc gcc-c++ kernel-devel redhat-rpm-config nano
   # homeassistant.components.image_processing.openalpr_local
     libXrandr-devel
   # device_tracker - ping
@@ -49,7 +49,7 @@ PACKAGES_DEV=(
   cmake git swig python3-devel
   libffi-devel openssl-devel libxml2-devel libxslt-devel
   libjpeg-turbo-devel libtiff-devel zlib-devel openjpeg2-devel freetype-devel lcms2-devel libwebp-devel 
-  libimagequant-devel libraqm-devel mariadb-devel postgresql-devel
+  libimagequant-devel libraqm-devel mariadb-devel postgresql-devel python3-Cython
   )
 
 if [ "`buildah images | grep ${newcontainer_name}`" == "" ]; then
@@ -75,6 +75,7 @@ if [ "`buildah images | grep ${newcontainer_name}`" == "" ]; then
 	buildah config --author "Daniel Riek <riek@llnvd.io>" --label name=hass_fedora${FED_RELEASE}_base $newcontainer
 	buildah unmount $newcontainer
 	buildah commit $newcontainer hass_fedora${FED_RELEASE}_base
+	buildah rm $newcontainer
 fi
 
 
@@ -131,53 +132,23 @@ if [ "`buildah images | grep ${buildcontainer_name}`" == "" ]; then
 
 	buildah unmount $buildcontainer
 	buildah commit $buildcontainer ${buildcontainer_name}
-fi
-
-#install hass component dependencies
-if [ "`buildah images | grep ${build2container_name}`" == "" ]; then
-	build2container=$(buildah from --network=host --name=${build2container_name} localhost/${buildcontainer_name})
-
-	build2mnt=$(buildah mount ${build2container})
-
-	dnf upgrade --installroot $build2mnt --release ${FED_RELEASE}  -y --setopt install_weak_deps=false --setopt='tsflags=nodocs' 
-
-	buildah add ${build2container} requirements_all.txt requirements_all.txt
-
-	# Uninstall enum34 because some dependencies install it but breaks Python 3.4+.
-	# See PR #8103 for more info.
-
-	buildah run ${build2container}  pip3 install --no-cache-dir -r requirements_all.txt && \
-	buildah run ${build2container}  pip3 install --no-cache-dir mysqlclient psycopg2 uvloop cchardet cython
-
-	# BEGIN: Development additions
-
-	# Install nodejs
-	#buildah run ${build2container} dnf install -y --setopt='tsflags=nodocs' nodejs
-	dnf install --installroot $build2mnt --release ${FED_RELEASE}  -y --setopt install_weak_deps=false --setopt='tsflags=nodocs' nodejs
-
-	# Install tox
-	buildah run ${build2container} pip3 install --no-cache-dir tox
-
-	# Copy over everything required to run tox
-	buildah add ${build2container} requirements_test_all.txt setup.cfg setup.py tox.ini ./
-	buildah add ${build2container} homeassistant/const.py homeassistant/const.py
-
-	# Prefetch dependencies for tox
-	buildah add ${build2container} homeassistant/package_constraints.txt homeassistant/package_constraints.txt
-	buildah run ${build2container} tox -e py36 --notest
-
-	# END: Development additions
-
-	buildah unmount $build2container
-	buildah commit $build2container ${build2container_name}
+	buildah rm $buildcontainer
 fi
 
 
-hasscontainer=$(buildah from --network=host --name=${hasscontainer_name} localhost/${build2container_name})
+hasscontainer=$(buildah from --network=host --name=${hasscontainer_name} localhost/${buildcontainer_name})
 hassmnt=$(buildah mount ${hasscontainer})
 
+dnf upgrade --installroot $hassmnt --release ${FED_RELEASE}  -y --setopt install_weak_deps=false --setopt='tsflags=nodocs' 
+
+# Install nodejs
+dnf install --installroot $hassmnt --release ${FED_RELEASE}  -y --setopt install_weak_deps=false --setopt='tsflags=nodocs' nodejs
+
+# Install virtualenv
+dnf install --installroot $hassmnt --release ${FED_RELEASE}  -y --setopt install_weak_deps=false --setopt='tsflags=nodocs' python3-virtualenv
+
 buildah run ${hasscontainer} groupadd -r homeassistant -g 989 
-buildah run ${hasscontainer} useradd -u 989 -r -g homeassistant -d /var/lib/homeassistant -s /sbin/nologin -c "Homeassistant User" homeassistant
+buildah run ${hasscontainer} useradd -u 989 -r -g homeassistant -G dialout -d /var/lib/homeassistant -s /sbin/nologin -c "Homeassistant User" homeassistant
 
 buildah run ${hasscontainer} mkdir -p /etc/homeassistant
 buildah run ${hasscontainer} chown -R homeassistant:homeassistant /etc/homeassistant
@@ -189,13 +160,46 @@ buildah run ${hasscontainer} chown -R homeassistant:homeassistant /srv/homeassis
 buildah config --workingdir /srv/homeassistant ${hasscontainer} 
 
 buildah config --port 8143 ${hasscontainer}
-buildah config --cmd "/usr/bin/python3 -m homeassistant --config /etc/homeassistant" ${hasscontainer} 
+buildah config --cmd "/bin/bash -c \"source bin/activate && /srv/homeassistant/bin/python3 -m homeassistant --config /etc/homeassistant --log-file /var/lib/homeassistant/home-assistant.log\"" ${hasscontainer} 
 
 buildah config --volume /etc/homeassistant:/etc/homeassistant ${hasscontainer} 
 buildah config --volume /var/lib/homeassistant:/var/lib/homeassistant ${hasscontainer}
 
 buildah config --user homeassistant:homeassistant ${hasscontainer} 
 
+buildah run ${hasscontainer} virtualenv-3 -p /usr/bin/python3 --system-site-packages /srv/homeassistant
+
+#install hass component dependencies
+buildah add ${hasscontainer} requirements_all.txt /srv/homeassistant/requirements_all.txt
+
+# Uninstall enum34 because some dependencies install it but breaks Python 3.4+.
+# See PR #8103 for more info.
+
+# Make sure openzwave uses system libraries
+# Create symlinks for https://github.com/OpenZWave/open-zwave/pull/1448
+# TODO shouldn't pkconfig sort this?
+buildah run ${hasscontainer} --user 0:0 ln -sv /usr/include/openzwave/*/* /usr/include/openzwave/
+#buildah run ${hasscontainer}  /bin/bash -c "source bin/activate && pip3 install --no-cache-dir python_openzwave --no-deps  --install-option='--flavor=shared'"
+# TODO figure out how to put the shared option into the requirements
+
+# Install requirements
+buildah run ${hasscontainer}  /bin/bash -c "source bin/activate && pip3 install --no-cache-dir -r requirements_all.txt"
+buildah run ${hasscontainer}  /bin/bash -c "source bin/activate && pip3 install --no-cache-dir mysqlclient psycopg2 uvloop cchardet"
+
+## BEGIN: Development additions
+#
+## Install tox
+#buildah run ${hasscontainer} pip3 install --no-cache-dir tox
+#
+## Copy over everything required to run tox
+#buildah add ${hasscontainer} requirements_test_all.txt setup.cfg setup.py tox.ini ./
+#buildah add ${hasscontainer} homeassistant/const.py homeassistant/const.py
+#
+## Prefetch dependencies for tox
+#buildah add ${hasscontainer} homeassistant/package_constraints.txt homeassistant/package_constraints.txt
+#buildah run ${hasscontainer} tox -e py36 --notest
+#
+# END: Development additions
 # Copy source
 buildah add --chown homeassistant:homeassistant ${hasscontainer} . /srv/homeassistant
 
@@ -204,4 +208,5 @@ buildah add --chown homeassistant:homeassistant ${hasscontainer} . /srv/homeassi
 
 buildah unmount ${hasscontainer}
 buildah commit ${hasscontainer} ${hasscontainer_name}
+buildah rm ${hasscontainer}
 
