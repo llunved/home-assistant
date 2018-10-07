@@ -70,7 +70,7 @@ if [ "`buildah images | grep ${newcontainer_name}`" == "" ]; then
 	dnf install --installroot $scratchmnt --release ${FED_RELEASE}  -y --setopt install_weak_deps=false --setopt='tsflags=nodocs' ${PACKAGES[@]}
 	dnf install --installroot $scratchmnt --release ${FED_RELEASE}  -y --setopt install_weak_deps=false --setopt='tsflags=nodocs' ${PACKAGES_DEV[@]}
 
-	dnf --installroot $buildmnt --release ${FED_RELEASE} -y clean all 
+	dnf --installroot $scratchmnt --release ${FED_RELEASE} -y clean all 
 
 	buildah config --author "Daniel Riek <riek@llnvd.io>" --label name=hass_fedora${FED_RELEASE}_base $newcontainer
 	buildah unmount $newcontainer
@@ -91,7 +91,7 @@ if [ "`buildah images | grep ${buildcontainer_name}`" == "" ]; then
 	buildah add ${buildcontainer} virtualization/buildah/ virtualization/buildah/
 
 	# This is a list of scripts that install additional dependencies. If you only
-	# need to install a package from the official debian repository, just add it
+	# need to install a package from the official fedora repository, just add it
 	# to the list above. Only create a script if you need compiling, manually
 	# downloading or a 3rd party repository.
 	if [ "$INSTALL_OPENALPR" == "yes" ]; then
@@ -178,7 +178,8 @@ buildah add ${hasscontainer} requirements_all.txt /srv/homeassistant/requirement
 # Make sure openzwave uses system libraries
 # Create symlinks for https://github.com/OpenZWave/open-zwave/pull/1448
 # TODO shouldn't pkconfig sort this?
-buildah run ${hasscontainer} --user 0:0 ln -sv /usr/include/openzwave/*/* /usr/include/openzwave/
+buildah run --user 0:0 ${hasscontainer} find /usr/include/openzwave/ -mindepth 1 -name \*.h -exec ln -sv {} /usr/include/openzwave/ \;
+
 #buildah run ${hasscontainer}  /bin/bash -c "source bin/activate && pip3 install --no-cache-dir python_openzwave --no-deps  --install-option='--flavor=shared'"
 # TODO figure out how to put the shared option into the requirements
 
