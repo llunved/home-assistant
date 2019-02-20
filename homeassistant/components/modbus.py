@@ -16,7 +16,7 @@ from homeassistant.const import (
 
 DOMAIN = 'modbus'
 
-REQUIREMENTS = ['pymodbus==1.3.1']
+REQUIREMENTS = ['pymodbus==1.5.2']
 
 # Type of network
 CONF_BAUDRATE = 'baudrate'
@@ -37,7 +37,7 @@ SERIAL_SCHEMA = {
 
 ETHERNET_SCHEMA = {
     vol.Required(CONF_HOST): cv.string,
-    vol.Required(CONF_PORT): cv.positive_int,
+    vol.Required(CONF_PORT): cv.port,
     vol.Required(CONF_TYPE): vol.Any('tcp', 'udp', 'rtuovertcp'),
     vol.Optional(CONF_TIMEOUT, default=3): cv.socket_timeout,
 }

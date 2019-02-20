@@ -4,7 +4,6 @@ Support for Xiaomi Gateways.
 For more details about this component, please refer to the documentation at
 https://home-assistant.io/components/xiaomi_aqara/
 """
-import asyncio
 import logging
 
 from datetime import timedelta
@@ -21,9 +20,8 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.event import async_track_point_in_utc_time
 from homeassistant.util.dt import utcnow
-from homeassistant.util import slugify
 
-REQUIREMENTS = ['PyXiaomiGateway==0.10.0']
+REQUIREMENTS = ['PyXiaomiGateway==0.11.1']
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -113,8 +111,7 @@ def setup(hass, config):
         interface = config[DOMAIN][CONF_INTERFACE]
         discovery_retry = config[DOMAIN][CONF_DISCOVERY_RETRY]
 
-    @asyncio.coroutine
-    def xiaomi_gw_discovered(service, discovery_info):
+    async def xiaomi_gw_discovered(service, discovery_info):
         """Perform action when Xiaomi Gateway device(s) has been found."""
         # We don't need to do anything here, the purpose of Home Assistant's
         # discovery service is to just trigger loading of this
@@ -218,24 +215,24 @@ class XiaomiDevice(Entity):
         self._get_from_hub = xiaomi_hub.get_from_hub
         self._device_state_attributes = {}
         self._remove_unavailability_tracker = None
-        xiaomi_hub.callbacks[self._sid].append(self._add_push_data_job)
+        self._xiaomi_hub = xiaomi_hub
         self.parse_data(device['data'], device['raw_data'])
         self.parse_voltage(device['data'])
 
         if hasattr(self, '_data_key') \
                 and self._data_key:  # pylint: disable=no-member
-            self._unique_id = slugify("{}-{}".format(
+            self._unique_id = "{}{}".format(
                 self._data_key,  # pylint: disable=no-member
-                self._sid))
+                self._sid)
         else:
-            self._unique_id = slugify("{}-{}".format(self._type, self._sid))
+            self._unique_id = "{}{}".format(self._type, self._sid)
 
     def _add_push_data_job(self, *args):
         self.hass.add_job(self.push_data, *args)
 
-    @asyncio.coroutine
-    def async_added_to_hass(self):
+    async def async_added_to_hass(self):
         """Start unavailability tracking."""
+        self._xiaomi_hub.callbacks[self._sid].append(self._add_push_data_job)
         self._async_track_unavailable()
 
     @property

@@ -29,7 +29,7 @@ from homeassistant.helpers import config_per_platform
 import homeassistant.helpers.config_validation as cv
 from homeassistant.setup import async_prepare_setup_platform
 
-REQUIREMENTS = ['mutagen==1.41.1']
+REQUIREMENTS = ['mutagen==1.42.0']
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -72,7 +72,7 @@ PLATFORM_SCHEMA = cv.PLATFORM_SCHEMA.extend({
 SCHEMA_SERVICE_SAY = vol.Schema({
     vol.Required(ATTR_MESSAGE): cv.string,
     vol.Optional(ATTR_CACHE): cv.boolean,
-    vol.Optional(ATTR_ENTITY_ID): cv.entity_ids,
+    vol.Optional(ATTR_ENTITY_ID): cv.comp_entity_ids,
     vol.Optional(ATTR_LANGUAGE): cv.string,
     vol.Optional(ATTR_OPTIONS): dict,
 })
@@ -299,7 +299,7 @@ class SpeechManager:
         # Is file store in file cache
         elif use_cache and key in self.file_cache:
             filename = self.file_cache[key]
-            self.hass.async_add_job(self.async_file_to_mem(key))
+            self.hass.async_create_task(self.async_file_to_mem(key))
         # Load speech from provider into memory
         else:
             filename = await self.async_get_tts_audio(
@@ -331,7 +331,7 @@ class SpeechManager:
         self._async_store_to_memcache(key, filename, data)
 
         if cache:
-            self.hass.async_add_job(
+            self.hass.async_create_task(
                 self.async_save_tts_audio(key, filename, data))
 
         return filename

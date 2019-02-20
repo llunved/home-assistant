@@ -4,14 +4,12 @@ Interfaces with Wink Cameras.
 For more details about this platform, please refer to the documentation at
 https://home-assistant.io/components/alarm_control_panel.wink/
 """
-import asyncio
 import logging
 
 import homeassistant.components.alarm_control_panel as alarm
 from homeassistant.components.wink import DOMAIN, WinkDevice
 from homeassistant.const import (
-    STATE_ALARM_ARMED_AWAY, STATE_ALARM_ARMED_HOME, STATE_ALARM_DISARMED,
-    STATE_UNKNOWN)
+    STATE_ALARM_ARMED_AWAY, STATE_ALARM_ARMED_HOME, STATE_ALARM_DISARMED)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -38,8 +36,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
 class WinkCameraDevice(WinkDevice, alarm.AlarmControlPanel):
     """Representation a Wink camera alarm."""
 
-    @asyncio.coroutine
-    def async_added_to_hass(self):
+    async def async_added_to_hass(self):
         """Call when entity is added to hass."""
         self.hass.data[DOMAIN]['entities']['alarm_control_panel'].append(self)
 
@@ -54,7 +51,7 @@ class WinkCameraDevice(WinkDevice, alarm.AlarmControlPanel):
         elif wink_state == "night":
             state = STATE_ALARM_ARMED_HOME
         else:
-            state = STATE_UNKNOWN
+            state = None
         return state
 
     def alarm_disarm(self, code=None):

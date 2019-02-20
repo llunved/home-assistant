@@ -4,12 +4,11 @@ For more details about this platform, please refer to the documentation at
 https://home-assistant.io/components/sensor.mychevy/
 """
 
-import asyncio
 import logging
 
 from homeassistant.components.mychevy import (
     EVSensorConfig, DOMAIN as MYCHEVY_DOMAIN, MYCHEVY_ERROR, MYCHEVY_SUCCESS,
-    NOTIFICATION_ID, NOTIFICATION_TITLE, UPDATE_TOPIC, ERROR_TOPIC
+    UPDATE_TOPIC, ERROR_TOPIC
 )
 from homeassistant.components.sensor import ENTITY_ID_FORMAT
 from homeassistant.core import callback
@@ -25,7 +24,8 @@ SENSORS = [
                    "mdi:speedometer"),
     EVSensorConfig("Charged By", "estimatedFullChargeBy"),
     EVSensorConfig("Charge Mode", "chargeMode"),
-    EVSensorConfig("Battery Level", BATTERY_SENSOR, "%", "mdi:battery")
+    EVSensorConfig("Battery Level", BATTERY_SENSOR, "%", "mdi:battery",
+                   ["charging"])
 ]
 
 _LOGGER = logging.getLogger(__name__)
@@ -55,8 +55,7 @@ class MyChevyStatus(Entity):
         """Initialize sensor with car connection."""
         self._state = None
 
-    @asyncio.coroutine
-    def async_added_to_hass(self):
+    async def async_added_to_hass(self):
         """Register callbacks."""
         self.hass.helpers.dispatcher.async_dispatcher_connect(
             UPDATE_TOPIC, self.success)
@@ -75,13 +74,10 @@ class MyChevyStatus(Entity):
     @callback
     def error(self):
         """Update state, trigger updates."""
-        if self._state != MYCHEVY_ERROR:
-            self.hass.components.persistent_notification.create(
-                "Error:<br/>Connection to mychevy website failed. "
-                "This probably means the mychevy to OnStar link is down.",
-                title=NOTIFICATION_TITLE,
-                notification_id=NOTIFICATION_ID)
-            self._state = MYCHEVY_ERROR
+        _LOGGER.error(
+            "Connection to mychevy website failed. "
+            "This probably means the mychevy to OnStar link is down")
+        self._state = MYCHEVY_ERROR
         self.async_schedule_update_ha_state()
 
     @property
@@ -119,9 +115,11 @@ class EVSensor(Entity):
         self._conn = connection
         self._name = config.name
         self._attr = config.attr
+        self._extra_attrs = config.extra_attrs
         self._unit_of_measurement = config.unit_of_measurement
         self._icon = config.icon
         self._state = None
+        self._state_attributes = {}
         self._car_vid = car_vid
 
         self.entity_id = ENTITY_ID_FORMAT.format(
@@ -129,8 +127,7 @@ class EVSensor(Entity):
                               slugify(self._car.name),
                               slugify(self._name)))
 
-    @asyncio.coroutine
-    def async_added_to_hass(self):
+    async def async_added_to_hass(self):
         """Register callbacks."""
         self.hass.helpers.dispatcher.async_dispatcher_connect(
             UPDATE_TOPIC, self.async_update_callback)
@@ -144,7 +141,8 @@ class EVSensor(Entity):
     def icon(self):
         """Return the icon."""
         if self._attr == BATTERY_SENSOR:
-            return icon_for_battery_level(self.state)
+            charging = self._state_attributes.get("charging", False)
+            return icon_for_battery_level(self.state, charging)
         return self._icon
 
     @property
@@ -157,12 +155,19 @@ class EVSensor(Entity):
         """Update state."""
         if self._car is not None:
             self._state = getattr(self._car, self._attr, None)
+            for attr in self._extra_attrs:
+                self._state_attributes[attr] = getattr(self._car, attr)
             self.async_schedule_update_ha_state()
 
     @property
     def state(self):
         """Return the state."""
         return self._state
+
+    @property
+    def device_state_attributes(self):
+        """Return all the state attributes."""
+        return self._state_attributes
 
     @property
     def unit_of_measurement(self):

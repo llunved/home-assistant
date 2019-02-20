@@ -86,10 +86,9 @@ class UnifiDeviceScanner(DeviceScanner):
 
     def _disconnect(self):
         """Disconnect the current SSH connection."""
-        # pylint: disable=broad-except
         try:
             self.ssh.logout()
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             pass
         finally:
             self.ssh = None
@@ -132,6 +131,6 @@ def _response_to_json(response):
                 active_clients[client.get("mac")] = client
 
         return active_clients
-    except ValueError:
+    except (ValueError, TypeError):
         _LOGGER.error("Failed to decode response from AP.")
         return {}

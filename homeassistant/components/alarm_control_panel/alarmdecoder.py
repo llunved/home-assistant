@@ -4,7 +4,6 @@ Support for AlarmDecoder-based alarm control panels (Honeywell/DSC).
 For more details about this platform, please refer to the documentation at
 https://home-assistant.io/components/alarm_control_panel.alarmdecoder/
 """
-import asyncio
 import logging
 
 import voluptuous as vol
@@ -59,8 +58,7 @@ class AlarmDecoderAlarmPanel(alarm.AlarmControlPanel):
         self._ready = None
         self._zone_bypassed = None
 
-    @asyncio.coroutine
-    def async_added_to_hass(self):
+    async def async_added_to_hass(self):
         """Register callbacks."""
         self.hass.helpers.dispatcher.async_dispatcher_connect(
             SIGNAL_PANEL_MESSAGE, self._message_callback)
@@ -101,7 +99,7 @@ class AlarmDecoderAlarmPanel(alarm.AlarmControlPanel):
     @property
     def code_format(self):
         """Return one or more digits/characters."""
-        return 'Number'
+        return alarm.FORMAT_NUMBER
 
     @property
     def state(self):

@@ -4,7 +4,6 @@ Nuki.io lock platform.
 For more details about this platform, please refer to the documentation
 https://home-assistant.io/components/lock.nuki/
 """
-import asyncio
 from datetime import timedelta
 import logging
 
@@ -16,7 +15,7 @@ from homeassistant.const import (
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.service import extract_entity_ids
 
-REQUIREMENTS = ['pynuki==1.3.1']
+REQUIREMENTS = ['pynuki==1.3.2']
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -92,8 +91,7 @@ class NukiLock(LockDevice):
         self._name = nuki_lock.name
         self._battery_critical = nuki_lock.battery_critical
 
-    @asyncio.coroutine
-    def async_added_to_hass(self):
+    async def async_added_to_hass(self):
         """Call when entity is added to hass."""
         if NUKI_DATA not in self.hass.data:
             self.hass.data[NUKI_DATA] = {}

@@ -1,6 +1,7 @@
 """The tests for the emulated Hue component."""
 import asyncio
 import json
+from ipaddress import ip_address
 from unittest.mock import patch
 
 from aiohttp.hdrs import CONTENT_TYPE
@@ -14,7 +15,7 @@ from homeassistant.components import (
 from homeassistant.components.emulated_hue import Config
 from homeassistant.components.emulated_hue.hue_api import (
     HUE_API_STATE_ON, HUE_API_STATE_BRI, HueUsernameView, HueOneLightStateView,
-    HueAllLightsStateView, HueOneLightChangeView)
+    HueAllLightsStateView, HueOneLightChangeView, HueAllGroupsStateView)
 from homeassistant.const import STATE_ON, STATE_OFF
 
 HTTP_SERVER_PORT = get_test_instance_port()
@@ -134,6 +135,7 @@ def hue_client(loop, hass_hue, aiohttp_client):
     HueAllLightsStateView(config).register(web_app, web_app.router)
     HueOneLightStateView(config).register(web_app, web_app.router)
     HueOneLightChangeView(config).register(web_app, web_app.router)
+    HueAllGroupsStateView(config).register(web_app, web_app.router)
 
     return loop.run_until_complete(aiohttp_client(web_app))
 
@@ -419,6 +421,20 @@ def test_proper_put_state_request(hue_client):
     assert result.status == 400
 
 
+@asyncio.coroutine
+def test_get_empty_groups_state(hue_client):
+    """Test the request to get groups endpoint."""
+    # Test proper on value parsing
+    result = yield from hue_client.get(
+            '/api/username/groups')
+
+    assert result.status == 200
+
+    result_json = yield from result.json()
+
+    assert result_json == {}
+
+
 # pylint: disable=invalid-name
 async def perform_put_test_on_ceiling_lights(hass_hue, hue_client,
                                              content_type='application/json'):
@@ -484,3 +500,12 @@ def perform_put_light_state(hass_hue, client, entity_id, is_on,
     yield from hass_hue.async_block_till_done()
 
     return result
+
+
+async def test_external_ip_blocked(hue_client):
+    """Test external IP blocked."""
+    with patch('homeassistant.components.http.real_ip.ip_address',
+               return_value=ip_address('45.45.45.45')):
+        result = await hue_client.get('/api/username/lights')
+
+    assert result.status == 400

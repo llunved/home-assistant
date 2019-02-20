@@ -4,7 +4,6 @@ Component to interface with various locks that can be controlled remotely.
 For more details about this component, please refer to the documentation
 at https://home-assistant.io/components/lock/
 """
-import asyncio
 from datetime import timedelta
 import functools as ft
 import logging
@@ -18,7 +17,7 @@ from homeassistant.helpers.config_validation import PLATFORM_SCHEMA  # noqa
 import homeassistant.helpers.config_validation as cv
 from homeassistant.const import (
     ATTR_CODE, ATTR_CODE_FORMAT, ATTR_ENTITY_ID, STATE_LOCKED, STATE_UNLOCKED,
-    STATE_UNKNOWN, SERVICE_LOCK, SERVICE_UNLOCK, SERVICE_OPEN)
+    SERVICE_LOCK, SERVICE_UNLOCK, SERVICE_OPEN)
 from homeassistant.components import group
 
 ATTR_CHANGED_BY = 'changed_by'
@@ -35,7 +34,7 @@ GROUP_NAME_ALL_LOCKS = 'all locks'
 MIN_TIME_BETWEEN_SCANS = timedelta(seconds=10)
 
 LOCK_SERVICE_SCHEMA = vol.Schema({
-    vol.Optional(ATTR_ENTITY_ID): cv.entity_ids,
+    vol.Optional(ATTR_ENTITY_ID): cv.comp_entity_ids,
     vol.Optional(ATTR_CODE): cv.string,
 })
 
@@ -57,49 +56,12 @@ def is_locked(hass, entity_id=None):
     return hass.states.is_state(entity_id, STATE_LOCKED)
 
 
-@bind_hass
-def lock(hass, entity_id=None, code=None):
-    """Lock all or specified locks."""
-    data = {}
-    if code:
-        data[ATTR_CODE] = code
-    if entity_id:
-        data[ATTR_ENTITY_ID] = entity_id
-
-    hass.services.call(DOMAIN, SERVICE_LOCK, data)
-
-
-@bind_hass
-def unlock(hass, entity_id=None, code=None):
-    """Unlock all or specified locks."""
-    data = {}
-    if code:
-        data[ATTR_CODE] = code
-    if entity_id:
-        data[ATTR_ENTITY_ID] = entity_id
-
-    hass.services.call(DOMAIN, SERVICE_UNLOCK, data)
-
-
-@bind_hass
-def open_lock(hass, entity_id=None, code=None):
-    """Open all or specified locks."""
-    data = {}
-    if code:
-        data[ATTR_CODE] = code
-    if entity_id:
-        data[ATTR_ENTITY_ID] = entity_id
-
-    hass.services.call(DOMAIN, SERVICE_OPEN, data)
-
-
-@asyncio.coroutine
-def async_setup(hass, config):
+async def async_setup(hass, config):
     """Track states and offer events for locks."""
-    component = EntityComponent(
+    component = hass.data[DOMAIN] = EntityComponent(
         _LOGGER, DOMAIN, hass, SCAN_INTERVAL, GROUP_NAME_ALL_LOCKS)
 
-    yield from component.async_setup(config)
+    await component.async_setup(config)
 
     component.async_register_entity_service(
         SERVICE_UNLOCK, LOCK_SERVICE_SCHEMA,
@@ -115,6 +77,11 @@ def async_setup(hass, config):
     )
 
     return True
+
+
+async def async_setup_entry(hass, entry):
+    """Set up a config entry."""
+    return await hass.data[DOMAIN].async_setup_entry(entry)
 
 
 class LockDevice(Entity):
@@ -183,5 +150,5 @@ class LockDevice(Entity):
         """Return the state."""
         locked = self.is_locked
         if locked is None:
-            return STATE_UNKNOWN
+            return None
         return STATE_LOCKED if locked else STATE_UNLOCKED

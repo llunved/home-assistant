@@ -4,7 +4,6 @@ Support for displaying the minimal and the maximal value.
 For more details about this platform, please refer to the documentation at
 https://home-assistant.io/components/sensor.min_max/
 """
-import asyncio
 import logging
 
 import voluptuous as vol
@@ -12,7 +11,8 @@ import voluptuous as vol
 import homeassistant.helpers.config_validation as cv
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import (
-    CONF_NAME, STATE_UNKNOWN, CONF_TYPE, ATTR_UNIT_OF_MEASUREMENT)
+    CONF_NAME, STATE_UNKNOWN, STATE_UNAVAILABLE, CONF_TYPE,
+    ATTR_UNIT_OF_MEASUREMENT)
 from homeassistant.core import callback
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.event import async_track_state_change
@@ -54,9 +54,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 })
 
 
-@asyncio.coroutine
-def async_setup_platform(hass, config, async_add_entities,
-                         discovery_info=None):
+async def async_setup_platform(hass, config, async_add_entities,
+                               discovery_info=None):
     """Set up the min/max/mean sensor."""
     entity_ids = config.get(CONF_ENTITY_IDS)
     name = config.get(CONF_NAME)
@@ -71,20 +70,20 @@ def async_setup_platform(hass, config, async_add_entities,
 
 def calc_min(sensor_values):
     """Calculate min value, honoring unknown states."""
-    val = STATE_UNKNOWN
+    val = None
     for sval in sensor_values:
         if sval != STATE_UNKNOWN:
-            if val == STATE_UNKNOWN or val > sval:
+            if val is None or val > sval:
                 val = sval
     return val
 
 
 def calc_max(sensor_values):
     """Calculate max value, honoring unknown states."""
-    val = STATE_UNKNOWN
+    val = None
     for sval in sensor_values:
         if sval != STATE_UNKNOWN:
-            if val == STATE_UNKNOWN or val < sval:
+            if val is None or val < sval:
                 val = sval
     return val
 
@@ -98,7 +97,7 @@ def calc_mean(sensor_values, round_digits):
             val += sval
             count += 1
     if count == 0:
-        return STATE_UNKNOWN
+        return None
     return round(val/count, round_digits)
 
 
@@ -120,14 +119,15 @@ class MinMaxSensor(Entity):
                      if self._sensor_type == v)).capitalize()
         self._unit_of_measurement = None
         self._unit_of_measurement_mismatch = False
-        self.min_value = self.max_value = self.mean = self.last = STATE_UNKNOWN
+        self.min_value = self.max_value = self.mean = self.last = None
         self.count_sensors = len(self._entity_ids)
         self.states = {}
 
         @callback
         def async_min_max_sensor_state_listener(entity, old_state, new_state):
             """Handle the sensor state changes."""
-            if new_state.state is None or new_state.state in STATE_UNKNOWN:
+            if (new_state.state is None
+                    or new_state.state in [STATE_UNKNOWN, STATE_UNAVAILABLE]):
                 self.states[entity] = STATE_UNKNOWN
                 hass.async_add_job(self.async_update_ha_state, True)
                 return
@@ -164,7 +164,7 @@ class MinMaxSensor(Entity):
     def state(self):
         """Return the state of the sensor."""
         if self._unit_of_measurement_mismatch:
-            return STATE_UNKNOWN
+            return None
         return getattr(self, next(
             k for k, v in SENSOR_TYPES.items() if self._sensor_type == v))
 
@@ -194,8 +194,7 @@ class MinMaxSensor(Entity):
         """Return the icon to use in the frontend, if any."""
         return ICON
 
-    @asyncio.coroutine
-    def async_update(self):
+    async def async_update(self):
         """Get the latest data and updates the states."""
         sensor_values = [self.states[k] for k in self._entity_ids
                          if k in self.states]

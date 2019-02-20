@@ -4,11 +4,10 @@ Support for Wink fans.
 For more details about this platform, please refer to the documentation at
 https://home-assistant.io/components/fan.wink/
 """
-import asyncio
 import logging
 
 from homeassistant.components.fan import (
-    SPEED_HIGH, SPEED_LOW, SPEED_MEDIUM, STATE_UNKNOWN, SUPPORT_DIRECTION,
+    SPEED_HIGH, SPEED_LOW, SPEED_MEDIUM, SUPPORT_DIRECTION,
     SUPPORT_SET_SPEED, FanEntity)
 from homeassistant.components.wink import DOMAIN, WinkDevice
 
@@ -33,8 +32,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
 class WinkFanDevice(WinkDevice, FanEntity):
     """Representation of a Wink fan."""
 
-    @asyncio.coroutine
-    def async_added_to_hass(self):
+    async def async_added_to_hass(self):
         """Call when entity is added to hass."""
         self.hass.data[DOMAIN]['entities']['fan'].append(self)
 
@@ -73,7 +71,7 @@ class WinkFanDevice(WinkDevice, FanEntity):
             return SPEED_MEDIUM
         if SPEED_HIGH == current_wink_speed:
             return SPEED_HIGH
-        return STATE_UNKNOWN
+        return None
 
     @property
     def current_direction(self):
