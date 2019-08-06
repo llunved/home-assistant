@@ -2,7 +2,7 @@
 
 set -ex
 
-FED_RELEASE=28
+FED_RELEASE=29
 
 newcontainer_name="hass_fedora${FED_RELEASE}_base"
 buildcontainer_name="hass_fedora${FED_RELEASE}_build"
