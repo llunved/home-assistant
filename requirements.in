@@ -5,8 +5,9 @@ async_timeout
 attrs
 bcrypt
 certifi>=2019.11.28
+ciso8601
 importlib-metadata
-jinja2>=2.10.3
+jinja2>=2.11.1
 PyJWT
 cryptography
 pip>=8.0.3
@@ -82,6 +83,7 @@ PyViCare
 # homeassistant.components.xiaomi_aqara
 PyXiaomiGateway
 
+# homeassistant.components.bmp280
 # homeassistant.components.mcp23017
 # homeassistant.components.rpi_gpio
 # RPi.GPIO
@@ -109,6 +111,9 @@ abodepy
 
 # homeassistant.components.mcp23017
 adafruit-blinka
+
+# homeassistant.components.bmp280
+adafruit-circuitpython-bmp280
 
 # homeassistant.components.mcp23017
 adafruit-circuitpython-mcp230xx
@@ -147,6 +152,7 @@ aioautomatic
 aiobotocore
 
 # homeassistant.components.dnsip
+# homeassistant.components.minecraft_server
 aiodns
 
 # homeassistant.components.esphome
@@ -160,6 +166,9 @@ aioftp
 
 # homeassistant.components.harmony
 aioharmony
+
+# homeassistant.components.homekit_controller
+aiohomekit[IP]
 
 # homeassistant.components.emulated_hue
 # homeassistant.components.http
@@ -191,6 +200,9 @@ aionotion
 
 # homeassistant.components.hunterdouglas_powerview
 aiopvapi
+
+# homeassistant.components.pvpc_hourly_pricing
+aiopvpc
 
 # homeassistant.components.webostv
 aiopylgtv
@@ -273,6 +285,9 @@ avea
 
 # homeassistant.components.avion
 # avion
+
+# homeassistant.components.avri
+avri-api
 
 # homeassistant.components.axis
 axis
@@ -398,6 +413,9 @@ connect-box
 # homeassistant.components.xiaomi_miio
 construct
 
+# homeassistant.components.coronavirus
+coronavirus
+
 # homeassistant.scripts.credstash
 # credstash
 
@@ -429,7 +447,7 @@ deluge-client
 denonavr
 
 # homeassistant.components.directv
-directpy
+directv
 
 # homeassistant.components.discogs
 discogs_client
@@ -631,6 +649,9 @@ greeneye_monitor
 # homeassistant.components.greenwave
 greenwavereality
 
+# homeassistant.components.griddy
+griddypower
+
 # homeassistant.components.growatt_server
 growattServer
 
@@ -688,9 +709,6 @@ home-assistant-frontend
 # homeassistant.components.zwave
 homeassistant-pyozw
 
-# homeassistant.components.homekit_controller
-homekit[IP]
-
 # homeassistant.components.homematicip_cloud
 homematicip
 
@@ -711,6 +729,9 @@ hydrawiser
 # homeassistant.components.bme280
 # homeassistant.components.htu21d
 # i2csense
+
+# homeassistant.components.iammeter
+iammeter
 
 # homeassistant.components.iaqualink
 iaqualink
@@ -869,9 +890,6 @@ minio
 # homeassistant.components.mitemp_bt
 mitemp_bt
 
-# homeassistant.components.mopar
-motorparts
-
 # homeassistant.components.tts
 mutagen
 
@@ -902,6 +920,12 @@ netdisco
 
 # homeassistant.components.neurio_energy
 neurio
+
+# homeassistant.components.nexia
+nexia
+
+# homeassistant.components.nextcloud
+nextcloudmonitor
 
 # homeassistant.components.niko_home_control
 niko-home-control
@@ -1004,6 +1028,7 @@ pilight
 # homeassistant.components.proxy
 # homeassistant.components.qrcode
 # homeassistant.components.seven_segments
+# homeassistant.components.sighthound
 # homeassistant.components.tensorflow
 pillow
 
@@ -1086,6 +1111,9 @@ py-cpuinfo
 # homeassistant.components.melissa
 py-melissa-climate
 
+# homeassistant.components.schluter
+py-schluter
+
 # homeassistant.components.synology
 py-synology
 
@@ -1134,9 +1162,6 @@ pyaftership
 
 # homeassistant.components.airvisual
 pyairvisual
-
-# homeassistant.components.alarmdotcom
-pyalarmdotcom
 
 # homeassistant.components.almond
 pyalmond
@@ -1237,6 +1262,9 @@ pyephember
 # homeassistant.components.everlights
 pyeverlights
 
+# homeassistant.components.ezviz
+pyezviz
+
 # homeassistant.components.fortigate
 pyfgt
 
@@ -1306,6 +1334,9 @@ pyintesishome
 
 # homeassistant.components.ipma
 pyipma
+
+# homeassistant.components.ipp
+pyipp
 
 # homeassistant.components.iqvia
 pyiqvia
@@ -1462,6 +1493,9 @@ pypoint
 # homeassistant.components.ps4
 pyps4-2ndscreen
 
+# homeassistant.components.qvr_pro
+pyqvrpro
+
 # homeassistant.components.qwikswitch
 pyqwikswitch
 
@@ -1516,6 +1550,9 @@ pysmartthings
 # homeassistant.components.smarty
 pysmarty
 
+# homeassistant.components.edl21
+pysml
+
 # homeassistant.components.snmp
 pysnmp
 
@@ -1539,6 +1576,9 @@ pysupla
 
 # homeassistant.components.syncthru
 pysyncthru
+
+# homeassistant.components.tankerkoenig
+pytankerkoenig
 
 # homeassistant.components.tautulli
 pytautulli
@@ -1793,6 +1833,9 @@ saltbox
 # homeassistant.components.samsungtv
 samsungctl[websocket]
 
+# homeassistant.components.samsungtv
+samsungtvws[websocket]
+
 # homeassistant.components.satel_integra
 satel_integra
 
@@ -1836,7 +1879,7 @@ sisyphus-control
 skybellpy
 
 # homeassistant.components.slack
-slacker
+slackclient
 
 # homeassistant.components.sleepiq
 sleepyq
@@ -1966,6 +2009,9 @@ temperusb
 
 # homeassistant.components.tensorflow
 # tensorflow
+
+# homeassistant.components.powerwall
+tesla-powerwall
 
 # homeassistant.components.tesla
 teslajsonpy
@@ -2155,3 +2201,850 @@ zigpy-zigate
 
 # homeassistant.components.zoneminder
 zm-py
+Sphinx
+sphinx-autodoc-typehints
+sphinx-autodoc-annotation
+# make new things fail. Manually update these pins when pulling in a
+# new version
+
+-r requirements_test_pre_commit.txt
+asynctest
+codecov
+mock-open
+mypy
+pre-commit
+pylint
+astroid
+pylint-strict-informational
+pytest-aiohttp
+pytest-cov
+pytest-sugar
+pytest-timeout
+pytest
+requests_mock
+responses
+# Home Assistant tests, full dependency set
+# Automatically generated by gen_requirements_all.py, do not edit
+
+-r requirements_test.txt
+
+# homeassistant.components.homekit
+HAP-python
+
+# homeassistant.components.mobile_app
+# homeassistant.components.owntracks
+PyNaCl
+
+# homeassistant.auth.mfa_modules.totp
+PyQRCode
+
+# homeassistant.components.rmvtransport
+PyRMVtransport
+
+# homeassistant.components.transport_nsw
+PyTransportNSW
+
+# homeassistant.components.remember_the_milk
+RtmAPI
+
+# homeassistant.components.yessssms
+YesssSMS
+
+# homeassistant.components.abode
+abodepy
+
+# homeassistant.components.androidtv
+adb-shell
+
+# homeassistant.components.adguard
+adguardhome
+
+# homeassistant.components.geonetnz_quakes
+aio_geojson_geonetnz_quakes
+
+# homeassistant.components.geonetnz_volcano
+aio_geojson_geonetnz_volcano
+
+# homeassistant.components.nsw_rural_fire_service_feed
+aio_geojson_nsw_rfs_incidents
+
+# homeassistant.components.gdacs
+aio_georss_gdacs
+
+# homeassistant.components.ambient_station
+aioambient
+
+# homeassistant.components.asuswrt
+aioasuswrt
+
+# homeassistant.components.automatic
+aioautomatic
+
+# homeassistant.components.aws
+aiobotocore
+
+# homeassistant.components.dnsip
+# homeassistant.components.minecraft_server
+aiodns
+
+# homeassistant.components.esphome
+aioesphomeapi
+
+# homeassistant.components.freebox
+aiofreepybox
+
+# homeassistant.components.harmony
+aioharmony
+
+# homeassistant.components.homekit_controller
+aiohomekit[IP]
+
+# homeassistant.components.emulated_hue
+# homeassistant.components.http
+aiohttp_cors
+
+# homeassistant.components.hue
+aiohue
+
+# homeassistant.components.notion
+aionotion
+
+# homeassistant.components.pvpc_hourly_pricing
+aiopvpc
+
+# homeassistant.components.webostv
+aiopylgtv
+
+# homeassistant.components.switcher_kis
+aioswitcher
+
+# homeassistant.components.unifi
+aiounifi
+
+# homeassistant.components.wwlln
+aiowwlln
+
+# homeassistant.components.airly
+airly
+
+# homeassistant.components.ambiclimate
+ambiclimate
+
+# homeassistant.components.androidtv
+androidtv
+
+# homeassistant.components.apns
+apns2
+
+# homeassistant.components.apprise
+apprise
+
+# homeassistant.components.aprs
+aprslib
+
+# homeassistant.components.arcam_fmj
+arcam-fmj
+
+# homeassistant.components.dlna_dmr
+# homeassistant.components.upnp
+async-upnp-client
+
+# homeassistant.components.stream
+av
+
+# homeassistant.components.axis
+axis
+
+# homeassistant.components.zha
+bellows-homeassistant
+
+# homeassistant.components.bom
+bomradarloop
+
+# homeassistant.components.broadlink
+broadlink
+
+# homeassistant.components.brother
+brother
+
+# homeassistant.components.buienradar
+buienradar
+
+# homeassistant.components.caldav
+caldav
+
+# homeassistant.components.coinmarketcap
+coinmarketcap
+
+# homeassistant.scripts.check_config
+colorlog
+
+# homeassistant.components.eddystone_temperature
+# homeassistant.components.eq3btsmart
+# homeassistant.components.xiaomi_miio
+construct
+
+# homeassistant.components.coronavirus
+coronavirus
+
+# homeassistant.scripts.credstash
+# credstash
+
+# homeassistant.components.datadog
+datadog
+
+# homeassistant.components.ihc
+# homeassistant.components.namecheapdns
+# homeassistant.components.ohmconnect
+# homeassistant.components.ssdp
+defusedxml
+
+# homeassistant.components.denonavr
+denonavr
+
+# homeassistant.components.directv
+directv
+
+# homeassistant.components.updater
+distro
+
+# homeassistant.components.doorbird
+doorbirdpy
+
+# homeassistant.components.dsmr
+dsmr_parser
+
+# homeassistant.components.dynalite
+dynalite_devices
+
+# homeassistant.components.ee_brightbox
+eebrightbox
+
+# homeassistant.components.elgato
+elgato
+
+# homeassistant.components.elkm1
+elkm1-lib
+
+# homeassistant.components.emulated_roku
+emulated_roku
+
+# homeassistant.components.season
+ephem
+
+# homeassistant.components.feedreader
+feedparser-homeassistant
+
+# homeassistant.components.foobot
+foobot_async
+
+# homeassistant.components.google_translate
+gTTS-token
+
+# homeassistant.components.garmin_connect
+garminconnect
+
+# homeassistant.components.geo_json_events
+# homeassistant.components.usgs_earthquakes_feed
+geojson_client
+
+# homeassistant.components.aprs
+geopy
+
+# homeassistant.components.geo_rss_events
+georss_generic_client
+
+# homeassistant.components.ign_sismologia
+georss_ign_sismologia_client
+
+# homeassistant.components.qld_bushfire
+georss_qld_bushfire_alert_client
+
+# homeassistant.components.braviatv
+# homeassistant.components.huawei_lte
+# homeassistant.components.kef
+# homeassistant.components.minecraft_server
+# homeassistant.components.nmap_tracker
+getmac
+
+# homeassistant.components.gios
+gios
+
+# homeassistant.components.glances
+glances_api
+
+# homeassistant.components.google
+google-api-python-client
+
+# homeassistant.components.google_pubsub
+google-cloud-pubsub
+
+# homeassistant.components.griddy
+griddypower
+
+# homeassistant.components.ffmpeg
+ha-ffmpeg
+
+# homeassistant.components.hangouts
+hangups
+
+# homeassistant.components.cloud
+hass-nabucasa
+
+# homeassistant.components.mqtt
+hbmqtt
+
+# homeassistant.components.jewish_calendar
+hdate
+
+# homeassistant.components.here_travel_time
+herepy
+
+# homeassistant.components.pi_hole
+hole
+
+# homeassistant.components.workday
+holidays
+
+# homeassistant.components.frontend
+home-assistant-frontend
+
+# homeassistant.components.zwave
+homeassistant-pyozw
+
+# homeassistant.components.homematicip_cloud
+homematicip
+
+# homeassistant.components.google
+# homeassistant.components.remember_the_milk
+httplib2
+
+# homeassistant.components.huawei_lte
+huawei-lte-api
+
+# homeassistant.components.iaqualink
+iaqualink
+
+# homeassistant.components.influxdb
+influxdb
+
+# homeassistant.components.rest
+# homeassistant.components.verisure
+jsonpath
+
+# homeassistant.scripts.keyring
+keyring
+
+# homeassistant.scripts.keyring
+keyrings.alt
+
+# homeassistant.components.konnected
+konnected
+
+# homeassistant.components.dyson
+libpurecool
+
+# homeassistant.components.mikrotik
+librouteros
+
+# homeassistant.components.soundtouch
+libsoundtouch
+
+# homeassistant.components.logi_circle
+logi_circle
+
+# homeassistant.components.luftdaten
+luftdaten
+
+# homeassistant.components.mythicbeastsdns
+mbddns
+
+# homeassistant.components.minecraft_server
+mcstatus
+
+# homeassistant.components.meteo_france
+meteofrance
+
+# homeassistant.components.mfi
+mficlient
+
+# homeassistant.components.minio
+minio
+
+# homeassistant.components.tts
+mutagen
+
+# homeassistant.components.ness_alarm
+nessclient
+
+# homeassistant.components.discovery
+# homeassistant.components.ssdp
+netdisco
+
+# homeassistant.components.nexia
+nexia
+
+# homeassistant.components.nsw_fuel_station
+nsw-fuel-api-client
+
+# homeassistant.components.nuheat
+nuheat
+
+# homeassistant.components.iqvia
+# homeassistant.components.opencv
+# homeassistant.components.tensorflow
+# homeassistant.components.trend
+numpy
+
+# homeassistant.components.google
+oauth2client
+
+# homeassistant.components.mqtt
+# homeassistant.components.shiftr
+paho-mqtt
+
+# homeassistant.components.aruba
+# homeassistant.components.cisco_ios
+# homeassistant.components.pandora
+# homeassistant.components.unifi_direct
+pexpect
+
+# homeassistant.components.pilight
+pilight
+
+# homeassistant.components.doods
+# homeassistant.components.proxy
+# homeassistant.components.qrcode
+# homeassistant.components.seven_segments
+# homeassistant.components.sighthound
+# homeassistant.components.tensorflow
+pillow
+
+# homeassistant.components.plex
+plexapi
+
+# homeassistant.components.plex
+plexauth
+
+# homeassistant.components.plex
+plexwebsocket
+
+# homeassistant.components.mhz19
+# homeassistant.components.serial_pm
+pmsensor
+
+# homeassistant.components.reddit
+praw
+
+# homeassistant.components.islamic_prayer_times
+prayer_times_calculator
+
+# homeassistant.components.prometheus
+prometheus_client
+
+# homeassistant.components.ptvsd
+ptvsd
+
+# homeassistant.components.androidtv
+pure-python-adb
+
+# homeassistant.components.pushbullet
+pushbullet.py
+
+# homeassistant.components.august
+py-august
+
+# homeassistant.components.canary
+py-canary
+
+# homeassistant.components.melissa
+py-melissa-climate
+
+# homeassistant.components.seventeentrack
+py17track
+
+# homeassistant.components.tplink
+pyHS100
+
+# homeassistant.components.met
+# homeassistant.components.norway_air
+pyMetno
+
+# homeassistant.components.rfxtrx
+pyRFXtrx
+
+# homeassistant.components.nextbus
+py_nextbusnext
+
+# homeassistant.components.hisense_aehw4a1
+pyaehw4a1
+
+# homeassistant.components.airvisual
+pyairvisual
+
+# homeassistant.components.almond
+pyalmond
+
+# homeassistant.components.arlo
+pyarlo
+
+# homeassistant.components.netatmo
+pyatmo
+
+# homeassistant.components.blackbird
+pyblackbird
+
+# homeassistant.components.neato
+pybotvac
+
+# homeassistant.components.cast
+pychromecast
+
+# homeassistant.components.coolmaster
+pycoolmasternet
+
+# homeassistant.components.daikin
+pydaikin
+
+# homeassistant.components.deconz
+pydeconz
+
+# homeassistant.components.zwave
+pydispatcher
+
+# homeassistant.components.everlights
+pyeverlights
+
+# homeassistant.components.fido
+pyfido
+
+# homeassistant.components.fritzbox
+pyfritzhome
+
+# homeassistant.components.ifttt
+pyfttt
+
+# homeassistant.components.bluetooth_le_tracker
+# homeassistant.components.skybeacon
+pygatt[GATTTOOL]
+
+# homeassistant.components.version
+pyhaversion
+
+# homeassistant.components.heos
+pyheos
+
+# homeassistant.components.homematic
+pyhomematic
+
+# homeassistant.components.icloud
+pyicloud
+
+# homeassistant.components.ipma
+pyipma
+
+# homeassistant.components.ipp
+pyipp
+
+# homeassistant.components.iqvia
+pyiqvia
+
+# homeassistant.components.kira
+pykira
+
+# homeassistant.components.linky
+pylinky
+
+# homeassistant.components.litejet
+pylitejet
+
+# homeassistant.components.mailgun
+pymailgunner
+
+# homeassistant.components.melcloud
+pymelcloud
+
+# homeassistant.components.somfy
+pymfy
+
+# homeassistant.components.mochad
+pymochad
+
+# homeassistant.components.modbus
+pymodbus
+
+# homeassistant.components.monoprice
+pymonoprice
+
+# homeassistant.components.myq
+pymyq
+
+# homeassistant.components.nut
+pynut2
+
+# homeassistant.components.nws
+pynws
+
+# homeassistant.components.nx584
+pynx584
+
+# homeassistant.components.openuv
+pyopenuv
+
+# homeassistant.components.opnsense
+pyopnsense
+
+# homeassistant.components.opentherm_gw
+pyotgw
+
+# homeassistant.auth.mfa_modules.notify
+# homeassistant.auth.mfa_modules.totp
+# homeassistant.components.otp
+pyotp
+
+# homeassistant.components.point
+pypoint
+
+# homeassistant.components.ps4
+pyps4-2ndscreen
+
+# homeassistant.components.qwikswitch
+pyqwikswitch
+
+# homeassistant.components.signal_messenger
+pysignalclirestapi
+
+# homeassistant.components.sma
+pysma
+
+# homeassistant.components.smartthings
+pysmartapp
+
+# homeassistant.components.smartthings
+pysmartthings
+
+# homeassistant.components.soma
+pysoma
+
+# homeassistant.components.sonos
+pysonos
+
+# homeassistant.components.spc
+pyspcwebgw
+
+# homeassistant.components.ecobee
+python-ecobee-api
+
+# homeassistant.components.darksky
+python-forecastio
+
+# homeassistant.components.izone
+python-izone
+
+# homeassistant.components.xiaomi_miio
+python-miio
+
+# homeassistant.components.nest
+python-nest
+
+# homeassistant.components.tado
+python-tado
+
+# homeassistant.components.twitch
+python-twitch-client
+
+# homeassistant.components.velbus
+python-velbus
+
+# homeassistant.components.awair
+python_awair
+
+# homeassistant.components.traccar
+pytraccar
+
+# homeassistant.components.tradfri
+pytradfri[async]
+
+# homeassistant.components.vera
+pyvera
+
+# homeassistant.components.vesync
+pyvesync
+
+# homeassistant.components.vizio
+pyvizio
+
+# homeassistant.components.html5
+pywebpush
+
+# homeassistant.components.rachio
+rachiopy
+
+# homeassistant.components.rainmachine
+regenmaschine
+
+# homeassistant.components.python_script
+restrictedpython
+
+# homeassistant.components.rflink
+rflink
+
+# homeassistant.components.ring
+ring_doorbell
+
+# homeassistant.components.roku
+roku
+
+# homeassistant.components.yamaha
+rxv
+
+# homeassistant.components.samsungtv
+samsungctl[websocket]
+
+# homeassistant.components.samsungtv
+samsungtvws[websocket]
+
+# homeassistant.components.sense
+sense_energy
+
+# homeassistant.components.sentry
+sentry-sdk
+
+# homeassistant.components.sighthound
+simplehound
+
+# homeassistant.components.simplisafe
+simplisafe-python
+
+# homeassistant.components.sleepiq
+sleepyq
+
+# homeassistant.components.smhi
+smhi-pkg
+
+# homeassistant.components.solaredge
+solaredge
+
+# homeassistant.components.honeywell
+somecomfort
+
+# homeassistant.components.marytts
+speak2mary
+
+# homeassistant.components.spotify
+spotipy
+
+# homeassistant.components.recorder
+# homeassistant.components.sql
+sqlalchemy
+
+# homeassistant.components.starline
+starline
+
+# homeassistant.components.statsd
+statsd
+
+# homeassistant.components.huawei_lte
+# homeassistant.components.solaredge
+# homeassistant.components.thermoworks_smoke
+# homeassistant.components.traccar
+stringcase
+
+# homeassistant.components.solarlog
+sunwatcher
+
+# homeassistant.components.tellduslive
+tellduslive
+
+# homeassistant.components.powerwall
+tesla-powerwall
+
+# homeassistant.components.tesla
+teslajsonpy
+
+# homeassistant.components.toon
+toonapilib
+
+# homeassistant.components.transmission
+transmissionrpc
+
+# homeassistant.components.twentemilieu
+twentemilieu
+
+# homeassistant.components.twilio
+twilio
+
+# homeassistant.components.huawei_lte
+url-normalize
+
+# homeassistant.components.uvc
+uvcclient
+
+# homeassistant.components.meteo_france
+vigilancemeteo
+
+# homeassistant.components.vilfo
+vilfo-api-client
+
+# homeassistant.components.verisure
+vsure
+
+# homeassistant.components.vultr
+vultr
+
+# homeassistant.components.panasonic_viera
+# homeassistant.components.wake_on_lan
+wakeonlan
+
+# homeassistant.components.folder_watcher
+watchdog
+
+# homeassistant.components.withings
+withings-api
+
+# homeassistant.components.wled
+wled
+
+# homeassistant.components.bluesound
+# homeassistant.components.rest
+# homeassistant.components.startca
+# homeassistant.components.ted5000
+# homeassistant.components.yr
+# homeassistant.components.zestimate
+xmltodict
+
+# homeassistant.components.yandex_transport
+ya_ma
+
+# homeassistant.components.yweather
+yahooweather
+
+# homeassistant.components.zeroconf
+zeroconf
+
+# homeassistant.components.zha
+zha-quirks
+
+# homeassistant.components.zha
+zigpy-cc
+
+# homeassistant.components.zha
+zigpy-deconz
+
+# homeassistant.components.zha
+zigpy-homeassistant
+
+# homeassistant.components.zha
+zigpy-xbee-homeassistant
+
+# homeassistant.components.zha
+zigpy-zigate
+# Automatically generated from .pre-commit-config.yaml by gen_requirements_all.py, do not edit
+
+bandit
+black
+codespell
+flake8-docstrings
+flake8
+isort
+pydocstyle
