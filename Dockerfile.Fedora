@@ -1,0 +1,100 @@
+ARG FEDORA_IMAGE_BUILD=fedora
+ARG FEDORA_IMAGE_RT=fedora-minimal
+ARG FEDORA_RELEASE=31
+ARG HTTP_PROXY=""
+ARG DNF_OPTS="--setopt install_weak_deps=false --setopt='tsflags=nodocs'"
+FROM $FEDORA_IMAGE_BUILD:$FEDORA_RELEASE as build
+
+LABEL MAINTAINER riek@llunved.net
+
+USER root
+
+RUN mkdir -p /hass
+WORKDIR /hass
+
+ADD ./rpmreqs-rt.txt ./rpmreqs-build.txt ./rpmreqs-dev.txt /hass
+
+ENV http_proxy=$HTTP_PROXY
+RUN rpm -ivh https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$FEDORA_RELEASE.noarch.rpm \
+    && rpm -ivh  https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$FEDORA_RELEASE.noarch.rpm \
+    && dnf -y $DNF_OPTS upgrade \
+    && dnf -y $DNF_OPTS install $(cat rpmreqs-rt.txt) $(cat rpmreqs-build.txt) \
+    && if [ ! -z "$DEVBUILD" ] ; then dnf $DNF_OPTS -y install $(cat rpmreqs-dev.txt); fi \ 
+    && rm -fv rpmreqs*.txt \
+    && dnf -y clean all
+
+ENV LANG=en_US.UTF-8
+       
+RUN /usr/bin/virtualenv -p /usr/bin/python3 --system-site-packages /hass
+
+ADD . /hass
+
+RUN source bin/activate \
+    && pip3 install --no-cache-dir -r requirements_all.txt \
+    && pip3 install --no-cache-dir mysqlclient psycopg2 uvloop cchardet
+
+
+
+FROM $FEDORA_IMAGE_RT:$FEDORA_RELEASE
+
+USER root
+
+RUN mkdir -p /hass
+WORKDIR /hass
+
+ENV USER=hass
+ENV CHOWN=true 
+ENV CHOWN_DIRS="/zwave2mqtt/store /var/log/zwave2mqtt /etc/openzwave" 
+  
+RUN groupadd -r ${USER} -g 1021 \
+    && useradd -u 1021 -r -g ${USER} -G dialout -G root -d /var/lib/hass -s /sbin/nologin -c "Homeassistant User" hass
+
+RUN mkdir -p /etc/hass \
+    && chown -R hass:hass /etc/hass \
+    && mkdir -p /var/lib/hass \
+    && chown -R hass:hass /var/lib/hass \
+    && mkdir -p /srv/hass \
+    && chown -R hass:hass /srv/hass
+
+VOLUME /etc/hass
+VOLUME /var/lib/hass
+
+EXPOSE 8143
+
+COPY --from=build /hass /hass
+RUN chown -R hass:hass /hass
+
+ENV http_proxy=$HTTP_PROXY
+
+#ADD ./rpmreqs-rt.txt ./rpmreqs-dev.txt /hass
+
+RUN microdnf -y update \
+    && microdnf -y install $(cat rpmreqs-rt.txt) \
+    && if [ ! -z "$DEVBUILD" ] ; then microdnf -y install $(cat rpmreqs-dev.txt); fi \ 
+    && microdnf -y clean all \
+    && rm -fv rpmreqs-rt.txt
+
+#move the oepnzwave config so that we can mount it persistently from the host
+#RUN mv -fv  /etc/openzwave /etc/openzwave.default && mkdir -pv /etc/openzwave
+
+ADD ./entrypoint.sh /sbin/ 
+ADD ./install.sh /sbin/ 
+ADD ./uninstall.sh /sbin/ 
+ADD ./start.sh /bin/ 
+RUN chmod +x /sbin/entrypoint.sh 
+RUN chmod +x /sbin/install.sh 
+RUN chmod +x /sbin/uninstall.sh 
+RUN chmod +x /bin/start.sh
+
+ENTRYPOINT ["/sbin/entrypoint.sh"]
+CMD ["/bin/start.sh"]
+
+
+# buildah config --cmd "/bin/bash -c \"source bin/activate && /srv/homeassistant/bin/python3 -m homeassistant --config /etc/homeassistant --log-file /var/lib/homeassistant/home-assistant.log\"" ${hasscontainer}
+
+LABEL RUN="podman run --rm -t -i --name \$NAME -p 8091:8091 --net=host --entrypoint /sbin/entrypoint.sh -v /var/lib/hass:/var/lib/hass -v /etc/hass:/etc/hass -v /var/log/hass:/var/log/hass \$IMAGE /bin/start.sh"
+
+LABEL INSTALL="podman run --rm -t -i --privileged --rm --net=host --ipc=host --pid=host -v /:/host -v /run:/run -e HOST=/host -e IMAGE=\$IMAGE -e NAME=\$NAME -e LOGDIR=/var/log -e DATADIR=/var/lib --entrypoint /bin/bash  \$IMAGE /sbin/install.sh"
+LABEL UNINSTALL="podman run --rm -t -i --privileged --rm --net=host --ipc=host --pid=host -v /:/host -v /run:/run -e HOST=/host -e IMAGE=\$IMAGE -e NAME=\$NAME -e LOGDIR=/var/log -e DATADIR=/var/lib --entrypoint /bin/bash  \$IMAGE /sbin/uninstall.sh"
+
+
