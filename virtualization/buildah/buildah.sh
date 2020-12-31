@@ -1,18 +1,18 @@
 #! /bin/bash
 
-set -ex
+set -e -x
 
-FED_RELEASE=28
+FED_RELEASE=31
 
 newcontainer_name="hass_fedora${FED_RELEASE}_base"
 buildcontainer_name="hass_fedora${FED_RELEASE}_build"
 build2container_name="hass_fedora${FED_RELEASE}_build2"
 hasscontainer_name="hass_fedora${FED_RELEASE}"
 
-INSTALL_OPENALPR="${INSTALL_OPENALPR:-yes}"
-INSTALL_LIBCEC="${INSTALL_LIBCEC:-yes}"
+INSTALL_OPENALPR="${INSTALL_OPENALPR:-no}" #yes
+INSTALL_LIBCEC="${INSTALL_LIBCEC:-no}" #yes
 INSTALL_PHANTOMJS="${INSTALL_PHANTOMJS:-no}"
-INSTALL_SSOCR="${INSTALL_SSOCR:-yes}"
+INSTALL_SSOCR="${INSTALL_SSOCR:-no}" #yes
 
 # Required Fedora packages for running hass or components
 PACKAGES=(
@@ -99,7 +99,7 @@ if [ "`buildah images | grep ${buildcontainer_name}`" == "" ]; then
 
 		PACKAGES_OPENALPR=(
 		  # homeassistant.components.image_processing.openalpr_local
-		    opencv-devel opencv-python3 tesseract-devel leptonica-devel log4cplus-devel
+		    opencv-devel tesseract-devel leptonica-devel log4cplus-devel
 		    )
 
 		dnf install --installroot $buildmnt --release ${FED_RELEASE}  -y --setopt install_weak_deps=false --setopt='tsflags=nodocs' ${PACKAGES_OPENALPR[@]}
@@ -167,7 +167,7 @@ buildah config --volume /var/lib/homeassistant:/var/lib/homeassistant ${hasscont
 
 buildah config --user homeassistant:homeassistant ${hasscontainer} 
 
-buildah run ${hasscontainer} virtualenv-3 -p /usr/bin/python3 --system-site-packages /srv/homeassistant
+buildah run ${hasscontainer} /usr/bin/virtualenv -p /usr/bin/python3 --system-site-packages /srv/homeassistant
 
 #install hass component dependencies
 buildah add ${hasscontainer} requirements_all.txt /srv/homeassistant/requirements_all.txt
@@ -178,7 +178,8 @@ buildah add ${hasscontainer} requirements_all.txt /srv/homeassistant/requirement
 # Make sure openzwave uses system libraries
 # Create symlinks for https://github.com/OpenZWave/open-zwave/pull/1448
 # TODO shouldn't pkconfig sort this?
-buildah run --user 0:0 ${hasscontainer} find /usr/include/openzwave/ -mindepth 1 -name \*.h -exec ln -sv {} /usr/include/openzwave/ \;
+# Only needed pre F31?
+#buildah run --user 0:0 ${hasscontainer} find /usr/include/openzwave/ -mindepth 1 -name \*.h -exec ln -sv {} /usr/include/openzwave/ \;
 
 #buildah run ${hasscontainer}  /bin/bash -c "source bin/activate && pip3 install --no-cache-dir python_openzwave --no-deps  --install-option='--flavor=shared'"
 # TODO figure out how to put the shared option into the requirements
